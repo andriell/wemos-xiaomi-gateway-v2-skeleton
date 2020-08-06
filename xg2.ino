@@ -41,11 +41,14 @@ void xg2Setup() {
     Serial.println(UDP_TX_PACKET_MAX_SIZE);
   }
 
-  xg2UdpUnicast.begin(XG2_GATEWAY_MULTICAST_PORT);
+  xg2UdpUnicast.begin(9899);
   xg2UdpMulticast.beginMulticast(WiFi.localIP(), xg2MulticastIp, XG2_GATEWAY_MULTICAST_PORT);
   xg2UdpDiscovery.beginMulticast(WiFi.localIP(), xg2MulticastIp, XG2_GATEWAY_DISCOVERY_PORT);
 }
 
+/**
+ * Reads the next unicast answer. Doesn't block the loop. Returns true if the answer has been read
+ */
 boolean xg2NextUnicastResp() {
   xg2LastUnicastResp = xg2EmptyJsonObject;
   int packetSize = xg2UdpUnicast.parsePacket();
@@ -81,13 +84,17 @@ boolean xg2NextUnicastResp() {
   return true;
 }
 
+/**
+ * Reads the next multicast answer. Doesn't block the loop. Returns true if the answer has been read
+ */
 boolean xg2NextMulticastResp() {
   xg2LastMulticastResp = xg2EmptyJsonObject;
 
   int packetSize = xg2UdpMulticast.parsePacket();
   if (!packetSize) {
     if (configDebugLvl > 1) {
-      Serial.println("Multicast response is empty");
+      Serial.print("Multicast response is empty ");
+      Serial.println(packetSize);
     }
     return false;
   }
@@ -134,6 +141,9 @@ boolean xg2NextMulticastResp() {
   return true;
 }
 
+/**
+ * Reads the next discovery answer. Doesn't block the loop. Returns true if the answer has been read
+ */
 boolean xg2NextDiscoveryResp() {
   xg2LastDiscoveryResp = xg2EmptyJsonObject;
 
@@ -173,6 +183,7 @@ boolean xg2NextDiscoveryResp() {
 
 
 /**
+ * Changes the state of the device. For example, includes a wall switch or air conditioner.
    {
      "cmd":"write",
      "model":"ctrl_neutral1",
@@ -181,15 +192,18 @@ boolean xg2NextDiscoveryResp() {
      "params":[{"channel_0":"off"}]
    }
 */
-int xg2Write(String model, String sid, String params) {
+int xg2Write(String model, String sid, String data) {
   String req =
     String("{\"cmd\":\"write\",\"model\":\"") + model +
     String("\",\"sid\":\"") + sid +
     String("\",\"key\":\"") + xg2Key() +
-    String("\",\"data\":\"") + params + String("\"}");
+    String("\",\"data\":\"") + data + String("\"}");
   return xg2UnicastRequest(req);
 }
 
+/**
+ * Unicast request. Returns more than one on success.
+ */
 int xg2UnicastRequest(String request) {
   if (configDebugLvl > 0) {
     Serial.print("Unicast send: ");
@@ -207,6 +221,9 @@ int xg2UnicastRequest(String request) {
   return isEnd;
 }
 
+/**
+ * Unicast multicast. Returns more than one on success.
+ */
 int xg2MulticastRequest(String request) {
   if (configDebugLvl > 0) {
     Serial.print("Multicast send: ");
@@ -223,6 +240,9 @@ int xg2MulticastRequest(String request) {
   return isEnd;
 }
 
+/**
+ * Unicast discovery. Returns more than one on success.
+ */
 int xg2DiscoveryRequest(String request) {
   if (configDebugLvl > 0) {
     Serial.print("Discovery send: ");
@@ -239,74 +259,128 @@ int xg2DiscoveryRequest(String request) {
   return isEnd;
 }
 
+/**
+ * A cmd parameter from last unicast response.
+ */
 String xg2UnicastCmd() {
   return xg2LastUnicastResp.containsKey(const_str_cmd) ? xg2LastUnicastResp[const_str_cmd].as<String>() : const_str_;
 }
 
+/**
+ * A sid parameter from last unicast response.
+ */
 String xg2UnicastSid() {
   return xg2LastUnicastResp.containsKey(const_str_sid) ? xg2LastUnicastResp[const_str_sid].as<String>() : const_str_;
 }
 
+/**
+ * A model parameter from last unicast response.
+ */
 String xg2UnicastModel() {
   return xg2LastUnicastResp.containsKey(const_str_model) ? xg2LastUnicastResp[const_str_model].as<String>() : const_str_;
 }
 
+/**
+ * A data parameter from last unicast response.
+ */
 String xg2UnicastData() {
   return xg2LastUnicastResp.containsKey(const_str_data) ? xg2LastUnicastResp[const_str_data].as<String>() : const_str_;
 }
 
+/**
+ * A short_id parameter from last unicast response.
+ */
 long xg2UnicastShortId() {
   return xg2LastUnicastResp.containsKey(const_str_short_id) ? xg2LastUnicastResp[const_str_short_id].as<long>() : 0L;
 }
 
+/**
+ * A cmd parameter from last multicast response.
+ */
 String xg2MulticastCmd() {
   return xg2LastMulticastResp.containsKey(const_str_cmd) ? xg2LastMulticastResp[const_str_cmd].as<String>() : const_str_;
 }
 
+/**
+ * A sid parameter from last multicast response.
+ */
 String xg2MulticastSid() {
   return xg2LastMulticastResp.containsKey(const_str_sid) ? xg2LastMulticastResp[const_str_sid].as<String>() : const_str_;
 }
 
+/**
+ * A model parameter from last multicast response.
+ */
 String xg2MulticastModel() {
   return xg2LastMulticastResp.containsKey(const_str_model) ? xg2LastMulticastResp[const_str_model].as<String>() : const_str_;
 }
 
+/**
+ * A data parameter from last multicast response.
+ */
 String xg2MulticastData() {
   return xg2LastMulticastResp.containsKey(const_str_data) ? xg2LastMulticastResp[const_str_data].as<String>() : const_str_;
 }
 
+/**
+ * A short_id parameter from last multicast response.
+ */
 long xg2MulticastShortId() {
   return xg2LastMulticastResp.containsKey(const_str_short_id) ? xg2LastMulticastResp[const_str_short_id].as<long>() : 0L;
 }
 
+/**
+ * A ip parameter from last discovery response.
+ */
 String xg2GatewayToken() {
   return xg2LastGatewayToken;
 }
 
+/**
+ * A port parameter from last discovery response.
+ */
 String xg2DiscoveryIp() {
   return xg2LastDiscoveryResp.containsKey(const_str_ip) ? xg2LastDiscoveryResp[const_str_ip].as<String>() : const_str_;
 }
 
+/**
+ * A sid parameter from last discovery response.
+ */
 int xg2DiscoveryPort() {
   return xg2LastDiscoveryResp.containsKey(const_str_port) ? xg2LastDiscoveryResp[const_str_port].as<int>() : 0;
 }
 
+/**
+ * A cmd parameter from last unicast response.
+ */
 String xg2DiscoverySid() {
   return xg2LastDiscoveryResp.containsKey(const_str_sid) ? xg2LastDiscoveryResp[const_str_sid].as<String>() : const_str_;
 }
 
+/**
+ * Last unicast response as JsonObject.
+ */
 JsonObject xg2UnicastResp() {
   return xg2LastUnicastResp;
 }
 
+/**
+ * Last multicast response as JsonObject.
+ */
 JsonObject xg2MulticastResp() {
   return xg2LastMulticastResp;
 }
 
+/**
+ * Last discovery response as JsonObject.
+ */
 JsonObject xg2DiscoveryResp() {
   return xg2LastDiscoveryResp;
 }
 
+/**
+ * Last data from multicast response as JsonObject.
+ */
 JsonObject xg2MulticastDataAsJsonObject() {
   String data = xg2MulticastData();
   if (const_str_.equals(data)) {
@@ -316,6 +390,9 @@ JsonObject xg2MulticastDataAsJsonObject() {
   return xg2DocMulticastRespData.as<JsonObject>();
 }
 
+/**
+ * Last data from multicast response as JsonArray.
+ */
 JsonArray xg2MulticastDataAsJsonArray() {
   String data = xg2MulticastData();
   if (const_str_.equals(data)) {
@@ -325,10 +402,16 @@ JsonArray xg2MulticastDataAsJsonArray() {
   return xg2DocMulticastRespData.as<JsonArray>();
 }
 
+/**
+ * Generates a key for xg2Write using the token from last heartbeat multicast response and the password from config.
+ */
 String xg2Key() {
   return xg2Encrypt(configGatewayPassword, xg2LastGatewayToken);
 }
 
+/**
+ * Generates a key for xg2Write using  key and token parameters.
+ */
 String xg2Encrypt(String key, String token) {
   if (key.length() != 16 || token.length() != 16) {
     return const_str_;

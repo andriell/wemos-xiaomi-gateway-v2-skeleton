@@ -23,6 +23,10 @@ boolean timeUpdate() {
     time_t t = timeNtpTime(timeServerList[i]);
     if (t > 0) {
       setTime(t);
+      if (configDebugLvl > 0) {
+        Serial.print("Time: ");
+        Serial.println(timeString());
+      }
       return true;
     }
     delay(100);

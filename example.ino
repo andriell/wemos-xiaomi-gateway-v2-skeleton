@@ -67,26 +67,9 @@ void exampleLoop2() {
   }
 }
 
-// Query sub-device list
-void exampleLoop3() {
-  if (const_str_.equals(configExamplePlugSid)) {
-    return;
-  }
-  // We are waiting for the gateway to report the heartbeat
-  // This should be done only if the program code begins with xg2Write
-  // Heartbeat is updated automatically when called xg2NextMulticastResp
-  while (const_str_.equals(xg2GatewayToken())) {
-    xg2NextMulticastResp();
-  }
-  while (xg2NextMulticastResp()) {}
-
-  String data = String("[{\\\"status\\\":\\\"") + (exampleIsOn ? "on" : "off") + String("\\\",\\\"key\\\":\\\"") + xg2Key() + String("\\\"}]");
-  xg2Write("plug", configExamplePlugSid, data);
-  exampleIsOn = !exampleIsOn;
-}
 
 // Listening MulticastResp
-void exampleLoop4() {
+void exampleLoop3() {
   while (xg2NextMulticastResp()) {
     Serial.print("Multicast resp. cmd: ");
     Serial.print(xg2MulticastCmd());
@@ -99,4 +82,37 @@ void exampleLoop4() {
     Serial.print("; data: ");
     Serial.println(xg2MulticastData());
   }
+}
+
+// Switch a plug
+void exampleLoop4() {
+  if (const_str_.equals(configExamplePlugSid)) {
+    return;
+  }
+  // We are waiting for the gateway to report the heartbeat
+  // This should be done only if the program code begins with xg2Write
+  // Heartbeat is updated automatically when called xg2NextMulticastResp
+  while (const_str_.equals(xg2GatewayToken())) {
+    while (xg2NextMulticastResp()) {
+      delay(100);
+    }
+    delay(100);
+  }
+
+  String data = String("[{\\\"status\\\":\\\"") + (exampleIsOn ? "on" : "off") + String("\\\",\\\"key\\\":\\\"") + xg2Key() + String("\\\"}]");
+  xg2Write("plug", configExamplePlugSid, data);
+  exampleIsOn = !exampleIsOn;
+  while (!xg2NextUnicastResp()) {
+    delay(100);
+  }
+  Serial.print("Write resp. cmd: ");
+  Serial.print(xg2UnicastCmd());
+  Serial.print("; model: ");
+  Serial.print(xg2UnicastModel());
+  Serial.print("; sid: ");
+  Serial.print(xg2UnicastSid());
+  Serial.print("; short_id: ");
+  Serial.print(xg2UnicastShortId());
+  Serial.print("; data: ");
+  Serial.println(xg2UnicastData());
 }
