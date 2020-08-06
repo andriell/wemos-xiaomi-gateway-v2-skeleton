@@ -1,0 +1,1 @@
+# wemos-xiaomi-gateway-v2-skeleton

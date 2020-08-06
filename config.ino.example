@@ -1,0 +1,14 @@
+const char* configWifiSsid = "***";
+const char* configWifiPassword = "***";
+
+const IPAddress configGatewayIp(192, 168, 1, 1);
+const String configGatewayPassword = String("***");
+
+// 0 - turned off
+// 1 - general information
+// 2 - full information
+const int configDebugLvl = 0;
+
+const int configTimeZone = 3;
+
+const String configExamplePlugSid = String("***");

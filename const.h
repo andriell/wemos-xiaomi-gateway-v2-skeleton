@@ -1,0 +1,11 @@
+const String const_str_ = String("");
+const String const_str_ip = String("ip");
+const String const_str_port = String("port");
+const String const_str_cmd = String("cmd");
+const String const_str_sid = String("sid");
+const String const_str_model = String("model");
+const String const_str_short_id = String("short_id");
+const String const_str_data = String("data");
+const String const_str_token = String("token");
+const String const_str_gateway = String("gateway");
+const String const_str_heartbeat = String("heartbeat");
