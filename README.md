@@ -70,12 +70,14 @@ Request example:
 
 #### Unicast getters
 
-* String **xg2UnicastCmd()**      - A cmd parameter from last unicast response.
-* String **xg2UnicastSid()**      - A sid parameter from last unicast response.
-* String **xg2UnicastModel()**    - A model parameter from last unicast response.
-* String **xg2UnicastData()**     - A data parameter from last unicast response.
-* long **xg2UnicastShortId()**    - A short_id parameter from last unicast response.
-* JsonObject **xg2UnicastResp()** - Last unicast response as JsonObject.
+* String **xg2UnicastCmd()**                  - A cmd parameter from last unicast response.
+* String **xg2UnicastSid()**                  - A sid parameter from last unicast response.
+* String **xg2UnicastModel()**                - A model parameter from last unicast response.
+* String **xg2UnicastData()**                 - A data parameter from last unicast response.
+* long **xg2UnicastShortId()**                - A short_id parameter from last unicast response.
+* JsonObject **xg2UnicastResp()**             - Last unicast response as JsonObject.
+* JsonObject **xg2UnicastDataAsJsonObject()** - Last data from unicast response as JsonObject.
+* JsonArray **xg2UnicastDataAsJsonArray()**   - Last data from unicast response as JsonArray.
 
 #### Multicast getters
 

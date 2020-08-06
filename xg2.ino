@@ -12,10 +12,11 @@ WiFiUDP xg2UdpUnicast;
 WiFiUDP xg2UdpMulticast;
 WiFiUDP xg2UdpDiscovery;
 
-DynamicJsonDocument xg2DocUnicastResp(1024);
-DynamicJsonDocument xg2DocMulticastResp(1024);
-DynamicJsonDocument xg2DocMulticastRespData(1024);
-DynamicJsonDocument xg2DocDiscoveryResp(1024);
+DynamicJsonDocument xg2DocUnicastResp(2048);
+DynamicJsonDocument xg2DocUnicastRespData(2048);
+DynamicJsonDocument xg2DocMulticastResp(2048);
+DynamicJsonDocument xg2DocMulticastRespData(2048);
+DynamicJsonDocument xg2DocDiscoveryResp(2048);
 JsonObject xg2LastUnicastResp;
 JsonObject xg2LastMulticastResp;
 JsonObject xg2LastDiscoveryResp;
@@ -365,18 +366,37 @@ JsonObject xg2UnicastResp() {
 }
 
 /**
+ * Last data from unicast response as JsonObject.
+ */
+JsonObject xg2UnicastDataAsJsonObject() {
+  String data = xg2UnicastData();
+  if (const_str_.equals(data)) {
+    return xg2EmptyJsonObject;
+  }
+  deserializeJson(xg2DocUnicastRespData, data);
+  return xg2DocUnicastRespData.as<JsonObject>();
+}
+
+
+/**
+ * Last data from unicast response as JsonArray.
+ */
+JsonArray xg2UnicastDataAsJsonArray() {
+  String data = xg2UnicastData();
+  if (const_str_.equals(data)) {
+    return xg2EmptyJsonArray;
+  }
+  deserializeJson(xg2DocUnicastRespData, data);
+  return xg2DocUnicastRespData.as<JsonArray>();
+}
+
+/**
  * Last multicast response as JsonObject.
  */
 JsonObject xg2MulticastResp() {
   return xg2LastMulticastResp;
 }
 
-/**
- * Last discovery response as JsonObject.
- */
-JsonObject xg2DiscoveryResp() {
-  return xg2LastDiscoveryResp;
-}
 
 /**
  * Last data from multicast response as JsonObject.
@@ -400,6 +420,13 @@ JsonArray xg2MulticastDataAsJsonArray() {
   }
   deserializeJson(xg2DocMulticastRespData, data);
   return xg2DocMulticastRespData.as<JsonArray>();
+}
+
+/**
+ * Last discovery response as JsonObject.
+ */
+JsonObject xg2DiscoveryResp() {
+  return xg2LastDiscoveryResp;
 }
 
 /**
