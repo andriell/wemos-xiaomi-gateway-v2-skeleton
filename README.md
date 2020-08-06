@@ -11,7 +11,7 @@ After downloading this source, rename config.ino.example to config.ino and write
 
 ## Methods
 
-* **boolean xg2NextUnicastResp()** - Reads the next unicast answer. Doesn't block the loop. Returns true if the answer has been read
+* boolean **xg2NextUnicastResp()** - Reads the next unicast answer. Doesn't block the loop. Returns true if the answer has been read
     
 Response example:
 
@@ -23,7 +23,7 @@ Response example:
         "data":"{\"voltage\":3025,\"status\":\"open\"}"
     }
 
-* **boolean xg2NextMulticastResp()** - Reads the next multicast answer. Doesn't block the loop. Returns true if the answer has been read. If the response was heartbeat, automatically update token for xg2Key() and xg2GatewayToken() methods.  
+* boolean **xg2NextMulticastResp()** - Reads the next multicast answer. Doesn't block the loop. Returns true if the answer has been read. If the response was heartbeat, automatically update token for xg2Key() and xg2GatewayToken() methods.  
 
 Response example:
 
@@ -37,7 +37,7 @@ Response example:
     }
 
     
-* **boolean xg2NextDiscoveryResp()** - Reads the next discovery answer. Doesn't block the loop. Returns true if the answer has been read
+* boolean **xg2NextDiscoveryResp()** - Reads the next discovery answer. Doesn't block the loop. Returns true if the answer has been read
     
 Response example:
 
@@ -50,7 +50,7 @@ Response example:
         "ip":"192.168.1.1"
     }
 
-* **int xg2Write(String model, String sid, String data)** - Changes the state of the device. For example, it turns on a wall switch or air conditioner.
+* int **xg2Write(String model, String sid, String data)** - Changes the state of the device. For example, it turns on a wall switch or air conditioner.
 
 Request example:
 
@@ -61,35 +61,37 @@ Request example:
         "data":"[{\"channel_0\":\"off\","key":"3EB43E37C20AFF4C5872CC0D04D81314",}]"
     }
     
-* **int xg2UnicastRequest(String request)** - Unicast request. Returns more than one on success.
-* **int xg2MulticastRequest(String request)** - Multicast request. Returns more than one on success.
-* **int xg2DiscoveryRequest(String request)** - Discovery request. Returns more than one on success.
+* int **xg2UnicastRequest(String request)** - Unicast request. Returns more than one on success.
+* int **xg2MulticastRequest(String request)** - Multicast request. Returns more than one on success.
+* int **xg2DiscoveryRequest(String request)** - Discovery request. Returns more than one on success.
 
-* **String xg2Key()** - Generates a key for xg2Write using the token from last heartbeat multicast response and the password from config.
-* **String xg2Encrypt(String key, String token)** - Generates a key for xg2Write using key and token parameters.
+* String **xg2Key()** - Generates a key for xg2Write using the token from last heartbeat multicast response and the password from config.
+* String **xg2Encrypt(String key, String token)** - Generates a key for xg2Write using key and token parameters.
 
-### Getters
+#### Unicast getters
 
-* **String xg2UnicastCmd()**   - A cmd parameter from last unicast response.
-* **String xg2UnicastSid()**   - A sid parameter from last unicast response.
-* **String xg2UnicastModel()** - A model parameter from last unicast response.
-* **String xg2UnicastData()**  - A data parameter from last unicast response.
-* **long xg2UnicastShortId()** - A short_id parameter from last unicast response.
+* String **xg2UnicastCmd()**      - A cmd parameter from last unicast response.
+* String **xg2UnicastSid()**      - A sid parameter from last unicast response.
+* String **xg2UnicastModel()**    - A model parameter from last unicast response.
+* String **xg2UnicastData()**     - A data parameter from last unicast response.
+* long **xg2UnicastShortId()**    - A short_id parameter from last unicast response.
+* JsonObject **xg2UnicastResp()** - Last unicast response as JsonObject.
 
-* **String xg2MulticastCmd()**   - A cmd parameter from last multicast response.
-* **String xg2MulticastSid()**   - A sid parameter from last multicast response.
-* **String xg2MulticastModel()** - A model parameter from last multicast response.
-* **String xg2MulticastData()**  - A data parameter from last multicast response.
-* **long xg2MulticastShortId()** - A short_id parameter from last multicast response.
-* **String xg2GatewayToken()**   - A cmd parameter from last unicast response.
+#### Multicast getters
 
-* **String xg2DiscoveryIp()**  - A ip parameter from last discovery response.
-* **int xg2DiscoveryPort()**   - A port parameter from last discovery response.
-* **String xg2DiscoverySid()** - A sid parameter from last discovery response.
+* String **xg2MulticastCmd()**                  - A cmd parameter from last multicast response.
+* String **xg2MulticastSid()**                  - A sid parameter from last multicast response.
+* String **xg2MulticastModel()**                - A model parameter from last multicast response.
+* String **xg2MulticastData()**                 - A data parameter from last multicast response.
+* String **xg2GatewayToken()**                  - A cmd parameter from last multicast response.
+* long **xg2MulticastShortId()**                - A short_id parameter from last multicast response.
+* JsonObject **xg2MulticastResp()**             - Last multicast response as JsonObject.
+* JsonObject **xg2MulticastDataAsJsonObject()** - Last data from multicast response as JsonObject.
+* JsonArray **xg2MulticastDataAsJsonArray()**   - Last data from multicast response as JsonArray.
 
-* **JsonObject xg2UnicastResp()**   - Last unicast response as JsonObject.
-* **JsonObject xg2MulticastResp()** - Last multicast response as JsonObject.
-* **JsonObject xg2DiscoveryResp()** - Last discovery response as JsonObject.
+#### Discovery getters
 
-* **JsonObject xg2MulticastDataAsJsonObject()** - Last data from multicast response as JsonObject.
-* **JsonArray xg2MulticastDataAsJsonArray()** - Last data from multicast response as JsonArray.
+* String **xg2DiscoveryIp()**  - A ip parameter from last discovery response.
+* String **xg2DiscoverySid()** - A sid parameter from last discovery response.
+* int **xg2DiscoveryPort()**   - A port parameter from last discovery response.
+* JsonObject **xg2DiscoveryResp()** - Last discovery response as JsonObject.
