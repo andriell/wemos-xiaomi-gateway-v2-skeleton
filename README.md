@@ -50,7 +50,7 @@ Response example:
         "ip":"192.168.1.1"
     }
 
-* **int xg2Write(String model, String sid, String data)** - Changes the state of the device. For example, includes a wall switch or air conditioner.
+* **int xg2Write(String model, String sid, String data)** - Changes the state of the device. For example, it turns on a wall switch or air conditioner.
 
 Request example:
 
@@ -66,7 +66,7 @@ Request example:
 * **int xg2DiscoveryRequest(String request)** - Discovery request. Returns more than one on success.
 
 * **String xg2Key()** - Generates a key for xg2Write using the token from last heartbeat multicast response and the password from config.
-* **String xg2Encrypt(String key, String token)** - Generates a key for xg2Write using  key and token parameters.
+* **String xg2Encrypt(String key, String token)** - Generates a key for xg2Write using key and token parameters.
 
 ### Getters
 
