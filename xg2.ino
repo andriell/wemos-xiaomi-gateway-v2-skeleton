@@ -222,7 +222,7 @@ int xg2UnicastRequest(String request) {
 }
 
 /**
- * Unicast multicast. Returns more than one on success.
+ * Multicast request. Returns more than one on success.
  */
 int xg2MulticastRequest(String request) {
   if (configDebugLvl > 0) {
@@ -241,7 +241,7 @@ int xg2MulticastRequest(String request) {
 }
 
 /**
- * Unicast discovery. Returns more than one on success.
+ * Discovery request. Returns more than one on success.
  */
 int xg2DiscoveryRequest(String request) {
   if (configDebugLvl > 0) {

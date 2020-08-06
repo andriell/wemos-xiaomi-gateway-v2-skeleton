@@ -23,7 +23,7 @@ Response example:
         "data":"{\"voltage\":3025,\"status\":\"open\"}"
     }
 
-* **boolean xg2NextMulticastResp()** - Reads the next multicast answer. Doesn't block the loop. Returns true if the answer has been read
+* **boolean xg2NextMulticastResp()** - Reads the next multicast answer. Doesn't block the loop. Returns true if the answer has been read. If the response was heartbeat, automatically update token for xg2Key() and xg2GatewayToken() methods.  
 
 Response example:
 
@@ -62,8 +62,8 @@ Request example:
     }
     
 * **int xg2UnicastRequest(String request)** - Unicast request. Returns more than one on success.
-* **int xg2MulticastRequest(String request)** - Unicast multicast. Returns more than one on success.
-* **int xg2DiscoveryRequest(String request)** - Unicast discovery. Returns more than one on success.
+* **int xg2MulticastRequest(String request)** - Multicast request. Returns more than one on success.
+* **int xg2DiscoveryRequest(String request)** - Discovery request. Returns more than one on success.
 
 * **String xg2Key()** - Generates a key for xg2Write using the token from last heartbeat multicast response and the password from config.
 * **String xg2Encrypt(String key, String token)** - Generates a key for xg2Write using  key and token parameters.
