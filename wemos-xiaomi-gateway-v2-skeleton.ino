@@ -33,13 +33,13 @@ void setup() {
   xg2Setup();
 }
 
-boolean isOn = false;
 void loop() {
   wifiLoop();
 
-  exampleLoop1();
-  exampleLoop2();
-  exampleLoop3();
-  exampleLoop4();
-  delay(60000);
+  exampleLoopSendCommand();
+  exampleUnicastLoop();
+  exampleMulticastLoop();
+  exampleDiscoveryLoop();
+
+  delay(1000);
 }

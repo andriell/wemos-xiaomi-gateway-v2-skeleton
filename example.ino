@@ -1,74 +1,63 @@
 DynamicJsonDocument exampleDoc(1024);
 
-boolean exampleIsOn = false;
+#define EXAMPLE_PERIOD 60
 
-// Discover the gateway device
-void exampleLoop1() {
-  Serial.println();
-  Serial.println();
-  Serial.println("exampleLoop1");
+boolean examplePlugIsOn = false;
+int exampleLoopDiscoveryCount = EXAMPLE_PERIOD;
+int exampleLoopListCount = EXAMPLE_PERIOD - 5;
+int exampleLoopPlugCount = EXAMPLE_PERIOD - 10;
 
-  String cmd = "{\"cmd\":\"whois\"}";
-  Serial.print("Multicast discovery send: ");
-  Serial.println(cmd);
-  xg2DiscoveryRequest(cmd);
+void exampleLoopSendCommand() {
+  exampleLoopDiscoveryCount++;
+  exampleLoopListCount++;
+  exampleLoopPlugCount++;
 
-  Serial.print("Waiting for an answer");
-  while (!xg2NextDiscoveryResp()) {
-    Serial.println(".");
-    delay(100);
+  String cmd;
+
+  if (exampleLoopDiscoveryCount > EXAMPLE_PERIOD) {
+    exampleLoopDiscoveryCount = 0;
+
+    cmd = "{\"cmd\":\"whois\"}";
+    Serial.print(timeString());
+    Serial.print(" Multicast discovery send: ");
+    Serial.println(cmd);
+    xg2DiscoveryRequest(cmd);
   }
 
-  // Resp: {"cmd":"iam","port":"9898","sid":"12345678901234","model":"gateway","proto_version":"1.1.2","ip":"192.168.1.1"}
-  JsonObject resp = xg2DiscoveryResp();
-  Serial.print("Gateway. ip: ");
-  Serial.print(xg2DiscoveryIp());
-  Serial.print("; port: ");
-  Serial.print(xg2DiscoveryPort());
-  Serial.print("; sid: ");
-  Serial.print(xg2DiscoverySid());
-  Serial.print("; proto_version: ");
-  Serial.println(resp["proto_version"].as<String>());
+  if (exampleLoopListCount > EXAMPLE_PERIOD) {
+    exampleLoopListCount = 0;
+
+    cmd = "{\"cmd\": \"get_id_list\"}";
+    Serial.print(timeString());
+    Serial.print(" Unicast send: ");
+    Serial.println(cmd);
+    xg2UnicastRequest(cmd);
+  }
+
+  if (exampleLoopPlugCount > EXAMPLE_PERIOD) {
+    // Switch a plug
+    exampleLoopPlugCount = 0;
+    Serial.print(timeString());
+    if (configExamplePlugSid.length() < 10) {
+      Serial.println(" configExamplePlugSid is empty");
+      return;
+    }
+    Serial.print(" Switches the plug using a token: ");
+    Serial.println(xg2GatewayToken());
+
+    examplePlugIsOn = !examplePlugIsOn;
+    examplePlugIsOn ? ledOn() : ledOff();
+    cmd = String("[{\\\"status\\\":\\\"") + (examplePlugIsOn ? "on" : "off") + String("\\\",\\\"key\\\":\\\"") + xg2Key() + String("\\\"}]");
+    xg2Write("plug", configExamplePlugSid, cmd);
+  }
 }
 
-// Get of sub device SID and device info
-void exampleLoop2() {
-  Serial.println();
-  Serial.println();
-  Serial.println("exampleLoop2");
 
-  String cmd = "{\"cmd\": \"get_id_list\"}";
-
-  Serial.print("Unicast send: ");
-  Serial.println(cmd);
-  xg2UnicastRequest(cmd);
-
-  Serial.print("Waiting for an answer");
-  while (!xg2NextUnicastResp()) {
-    Serial.println(".");
-    delay(100);
-  }
-
-  // {"cmd":"get_id_list_ack","sid":"12345678901234","token":"12345678901234","data":"[\"12345678901234\",\"12345678901234\",\"12345678901234\"]"}
-  JsonObject resp = xg2UnicastResp();
-  Serial.print("Device SIDs: ");
-  Serial.println(xg2UnicastData());
-
-
-  JsonArray array = xg2UnicastDataAsJsonArray();
-  Serial.print("Devices found: ");
-  Serial.println(array.size());
-
-  int i = 0;
-  for (JsonVariant v : array) {
-    Serial.print("Device ");
-    Serial.print(++i);
-
-    cmd = String("{\"cmd\":\"read\",\"sid\":\"") + v.as<String>() + String("\"}");
-    xg2UnicastRequest(cmd);
-    while (!xg2NextUnicastResp()) {
-      delay(100);
-    }
+void exampleUnicastLoop() {
+  while (xg2NextUnicastResp()) {
+    Serial.print(timeString());
+    Serial.print(" Unicast resp. cmd: ");
+    Serial.print(xg2UnicastCmd());
     Serial.print("; model: ");
     Serial.print(xg2UnicastModel());
     Serial.print("; sid: ");
@@ -77,18 +66,46 @@ void exampleLoop2() {
     Serial.print(xg2UnicastShortId());
     Serial.print("; data: ");
     Serial.println(xg2UnicastData());
+
+    // {"cmd":"get_id_list_ack","sid":"12345678901234","token":"12345678901234","data":"[\"12345678901234\",\"12345678901234\"]"}
+    if (xg2UnicastCmd().equals("get_id_list_ack")) {
+      JsonArray array = xg2UnicastDataAsJsonArray();
+      Serial.print("Devices found: ");
+      Serial.println(array.size());
+
+      int i = 0;
+      for (JsonVariant v : array) {
+        Serial.print(timeString());
+        Serial.print(" Device ");
+        Serial.print(++i);
+        String cmd = String("{\"cmd\":\"read\",\"sid\":\"") + v.as<String>() + String("\"}");
+        xg2UnicastRequest(cmd);
+
+        int limit = 200;
+        while (!xg2NextUnicastResp()) {
+          if (--limit <= 0) {
+            Serial.println("No answer");
+            break;
+          }
+          delay(10);
+        }
+        Serial.print("; model: ");
+        Serial.print(xg2UnicastModel());
+        Serial.print("; sid: ");
+        Serial.print(xg2UnicastSid());
+        Serial.print("; short_id: ");
+        Serial.print(xg2UnicastShortId());
+        Serial.print("; data: ");
+        Serial.println(xg2UnicastData());
+      }
+    }
   }
 }
 
-
-// Listening MulticastResp
-void exampleLoop3() {
-  Serial.println();
-  Serial.println();
-  Serial.println("exampleLoop3");
-
+void exampleMulticastLoop() {
   while (xg2NextMulticastResp()) {
-    Serial.print("Multicast resp. cmd: ");
+    Serial.print(timeString());
+    Serial.print(" Multicast resp. cmd: ");
     Serial.print(xg2MulticastCmd());
     Serial.print("; model: ");
     Serial.print(xg2MulticastModel());
@@ -101,45 +118,18 @@ void exampleLoop3() {
   }
 }
 
-// Switch a plug
-void exampleLoop4() {
-  Serial.println();
-  Serial.println();
-  Serial.println("exampleLoop4");
-  if (configExamplePlugSid.length() < 10) {
-    Serial.println("configExamplePlugSid is empty");
-    return;
+void exampleDiscoveryLoop() {
+  while (xg2NextDiscoveryResp()) {
+    // Resp: {"cmd":"iam","port":"9898","sid":"12345678901234","model":"gateway","proto_version":"1.1.2","ip":"192.168.1.1"}
+    JsonObject resp = xg2DiscoveryResp();
+    Serial.print(timeString());
+    Serial.print(" Discovery resp. ip: ");
+    Serial.print(xg2DiscoveryIp());
+    Serial.print("; port: ");
+    Serial.print(xg2DiscoveryPort());
+    Serial.print("; sid: ");
+    Serial.print(xg2DiscoverySid());
+    Serial.print("; proto_version: ");
+    Serial.println(resp["proto_version"].as<String>());
   }
-  // For writeing, you need to use the last token from heartbeat multicast response
-  // We are waiting for the gateway to report the heartbeat and a new token
-  // Token is updated automatically when called xg2NextMulticastResp
-  // You don't need to do this if you often call xg2NextMulticastResp
-  while (xg2NextMulticastResp()) {}
-  String oldToken = xg2GatewayToken();
-  while (oldToken.equals(xg2GatewayToken())) {
-    while (xg2NextMulticastResp()) {
-      delay(100);
-    }
-  }
-
-  Serial.print("Using a token: ");
-  Serial.println(xg2GatewayToken());
-
-
-  String data = String("[{\\\"status\\\":\\\"") + (exampleIsOn ? "on" : "off") + String("\\\",\\\"key\\\":\\\"") + xg2Key() + String("\\\"}]");
-  xg2Write("plug", configExamplePlugSid, data);
-  exampleIsOn = !exampleIsOn;
-  while (!xg2NextUnicastResp()) {
-    delay(100);
-  }
-  Serial.print("Write resp. cmd: ");
-  Serial.print(xg2UnicastCmd());
-  Serial.print("; model: ");
-  Serial.print(xg2UnicastModel());
-  Serial.print("; sid: ");
-  Serial.print(xg2UnicastSid());
-  Serial.print("; short_id: ");
-  Serial.print(xg2UnicastShortId());
-  Serial.print("; data: ");
-  Serial.println(xg2UnicastData());
 }

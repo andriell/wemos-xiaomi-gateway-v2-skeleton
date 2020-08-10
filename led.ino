@@ -12,6 +12,10 @@ void ledBlink(int n, unsigned long d) {
   }
 }
 
+void ledOn() {
+  digitalWrite(WEMOS_D4_LED, LOW);
+}
+
 void ledOff() {
   digitalWrite(WEMOS_D4_LED, HIGH);
 }

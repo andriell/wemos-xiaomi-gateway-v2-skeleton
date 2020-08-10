@@ -1,4 +1,4 @@
-const String const_str_ = String("");
+const String const_str_empty = String("");
 const String const_str_ip = String("ip");
 const String const_str_port = String("port");
 const String const_str_cmd = String("cmd");
