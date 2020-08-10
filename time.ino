@@ -23,10 +23,8 @@ boolean timeUpdate() {
     time_t t = timeNtpTime(timeServerList[i]);
     if (t > 0) {
       setTime(t);
-      if (configDebugLvl > 0) {
-        Serial.print("Time: ");
-        Serial.println(timeString());
-      }
+      dbg(1, "Time: ");
+      dbgLn(1, timeString());
       return true;
     }
     delay(100);
@@ -50,24 +48,18 @@ time_t timeNtpTime(char* serverName) {
   IPAddress ntpServerIP; // NTP server's ip address
 
   while (timeUdp.parsePacket() > 0) ; // discard any previously received packets
-  if (configDebugLvl > 0) {
-    Serial.println("Transmit NTP Request");
-  }
+  dbgLn(1, "Transmit NTP Request");
   // get a random server from the pool
   WiFi.hostByName(serverName, ntpServerIP);
-  if (configDebugLvl > 0) {
-    Serial.print(serverName);
-    Serial.print(": ");
-    Serial.println(ntpServerIP);
-  }
+  dbg(1, serverName);
+  dbg(1, ": ");
+  dbgLn(1, ntpServerIP);
   timeSendNTPpacket(ntpServerIP);
   uint32_t beginWait = millis();
   while (millis() - beginWait < 1500) {
     int size = timeUdp.parsePacket();
     if (size >= TIME_NTP_PACKET_SIZE) {
-      if (configDebugLvl > 0) {
-        Serial.println("Receive NTP Response");
-      }
+      dbgLn(1, "Receive NTP Response");
       timeUdp.read(timePacketBuffer, TIME_NTP_PACKET_SIZE);  // read packet into the buffer
       unsigned long secsSince1900;
       // convert four bytes starting at location 40 to a long integer
@@ -78,9 +70,7 @@ time_t timeNtpTime(char* serverName) {
       return secsSince1900 - 2208988800UL + configTimeZone * SECS_PER_HOUR;
     }
   }
-  if (configDebugLvl > 0) {
-    Serial.println("No NTP Response :-(");
-  }
+  dbgLn(1, "No NTP Response :-(");
   return 0; // return 0 if unable to get the time
 }
 

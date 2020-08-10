@@ -27,20 +27,18 @@ const JsonArray xg2EmptyJsonArray;
 String xg2LastGatewayToken;
 
 void xg2Setup() {
-  if (configDebugLvl > 0) {
-    String key = "0987654321qwerty";
-    String token = "1234567890abcdef";
-    String resp = xg2Encrypt(key, token);
-    String result = String("3EB43E37C20AFF4C5872CC0D04D81314");
-    boolean encryptionTest = result.equals(resp);
+  String key = "0987654321qwerty";
+  String token = "1234567890abcdef";
+  String resp = xg2Encrypt(key, token);
+  String result = String("3EB43E37C20AFF4C5872CC0D04D81314");
+  boolean encryptionTest = result.equals(resp);
 
-    Serial.print(encryptionTest ? "Encryption test success " : "!!!Encryption test error!!! ");
-    Serial.print(result);
-    Serial.print(encryptionTest ? "==" : "<>");
-    Serial.println(resp);
-    Serial.print("UDP_TX_PACKET_MAX_SIZE = ");
-    Serial.println(UDP_TX_PACKET_MAX_SIZE);
-  }
+  Serial.print(encryptionTest ? "Encryption test success " : "!!!Encryption test error!!! ");
+  Serial.print(result);
+  Serial.print(encryptionTest ? "==" : "<>");
+  Serial.println(resp);
+  Serial.print("UDP_TX_PACKET_MAX_SIZE = ");
+  Serial.println(UDP_TX_PACKET_MAX_SIZE);
 
   xg2UdpUnicast.begin(9891);
   xg2UdpMulticast.beginMulticast(WiFi.localIP(), xg2MulticastIp, XG2_GATEWAY_MULTICAST_PORT);
@@ -54,33 +52,26 @@ boolean xg2NextUnicastResp() {
   xg2LastUnicastResp = xg2EmptyJsonObject;
   int packetSize = xg2UdpUnicast.parsePacket();
   if (!packetSize) {
-    if (configDebugLvl > 1) {
-      Serial.println("Unicast response is empty");
-    }
+    dbgLn(2, "Unicast response is empty");
     return false;
   }
-  if (configDebugLvl > 1) {
-    Serial.print("Unicast packet. Size: ");
-    Serial.print(packetSize);
-    Serial.print("; Remote IP: ");
-    Serial.print(xg2UdpUnicast.remoteIP().toString().c_str());
-    Serial.print("; Remote Port: ");
-    Serial.print(xg2UdpUnicast.remotePort());
-    Serial.print("; Destination IP: ");
-    Serial.print(xg2UdpDiscovery.destinationIP());
-    Serial.print("; Local Port: ");
-    Serial.println(xg2UdpUnicast.localPort());
-
-  }
+  dbg(2, "Unicast packet. Size: ");
+  dbg(2, packetSize);
+  dbg(2, "; Remote IP: ");
+  dbg(2, xg2UdpUnicast.remoteIP().toString().c_str());
+  dbg(2, "; Remote Port: ");
+  dbg(2, xg2UdpUnicast.remotePort());
+  dbg(2, "; Destination IP: ");
+  dbg(2, xg2UdpDiscovery.destinationIP());
+  dbg(2, "; Local Port: ");
+  dbgLn(2, xg2UdpUnicast.localPort());
 
   int len = xg2UdpUnicast.read(xg2Buffer, UDP_TX_PACKET_MAX_SIZE);
   if (len > 0) {
     xg2Buffer[len] = 0;
   }
-  if (configDebugLvl > 0) {
-    Serial.print("Unicast resp: ");
-    Serial.println(xg2Buffer);
-  }
+  dbg(1, "Unicast resp: ");
+  dbgLn(1, xg2Buffer);
 
   deserializeJson(xg2DocUnicastResp, xg2Buffer);
 
@@ -97,33 +88,26 @@ boolean xg2NextMulticastResp() {
 
   int packetSize = xg2UdpMulticast.parsePacket();
   if (!packetSize) {
-    if (configDebugLvl > 1) {
-      Serial.print("Multicast response is empty ");
-      Serial.println(packetSize);
-    }
+    dbgLn(2, "Multicast response is empty");
     return false;
   }
-  if (configDebugLvl > 1) {
-    Serial.print("Multicast packet. Size: ");
-    Serial.print(packetSize);
-    Serial.print("; Remote IP: ");
-    Serial.print(xg2UdpMulticast.remoteIP().toString().c_str());
-    Serial.print("; Remote Port: ");
-    Serial.print(xg2UdpMulticast.remotePort());
-    Serial.print("; Destination IP: ");
-    Serial.print(xg2UdpDiscovery.destinationIP());
-    Serial.print("; Local Port: ");
-    Serial.println(xg2UdpUnicast.localPort());
-  }
+  dbg(2, "Multicast packet. Size: ");
+  dbg(2, packetSize);
+  dbg(2, "; Remote IP: ");
+  dbg(2, xg2UdpMulticast.remoteIP().toString().c_str());
+  dbg(2, "; Remote Port: ");
+  dbg(2, xg2UdpMulticast.remotePort());
+  dbg(2, "; Destination IP: ");
+  dbg(2, xg2UdpDiscovery.destinationIP());
+  dbg(2, "; Local Port: ");
+  dbgLn(2, xg2UdpUnicast.localPort());
 
   int len = xg2UdpMulticast.read(xg2Buffer, UDP_TX_PACKET_MAX_SIZE);
   if (len > 0) {
     xg2Buffer[len] = 0;
   }
-  if (configDebugLvl > 0) {
-    Serial.print("Multicast resp: ");
-    Serial.println(xg2Buffer);
-  }
+  dbg(1, "Multicast resp: ");
+  dbgLn(1, xg2Buffer);
 
   deserializeJson(xg2DocMulticastResp, xg2Buffer);
 
@@ -139,10 +123,8 @@ boolean xg2NextMulticastResp() {
   ) {
     // This is a gateway heartbeat
     xg2LastGatewayToken = xg2LastMulticastResp[const_str_token].as<String>();
-    if (configDebugLvl > 1) {
-      Serial.print("New token: ");
-      Serial.println(xg2LastGatewayToken);
-    }
+    dbg(2, "New token: ");
+    dbgLn(2, xg2LastGatewayToken);
   }
 
   return true;
@@ -156,32 +138,27 @@ boolean xg2NextDiscoveryResp() {
 
   int packetSize = xg2UdpDiscovery.parsePacket();
   if (!packetSize) {
-    if (configDebugLvl > 1) {
-      Serial.println("Multicast discovery response is empty");
-    }
+    dbgLn(2, "Multicast discovery response is empty");
     return false;
   }
-  if (configDebugLvl > 1) {
-    Serial.print("Multicast discovery packet. Size: ");
-    Serial.print(packetSize);
-    Serial.print("; Remote IP: ");
-    Serial.print(xg2UdpDiscovery.remoteIP().toString().c_str());
-    Serial.print("; Remote Port: ");
-    Serial.print(xg2UdpDiscovery.remotePort());
-    Serial.print("; Destination IP: ");
-    Serial.print(xg2UdpDiscovery.destinationIP());
-    Serial.print("; Local Port: ");
-    Serial.println(xg2UdpUnicast.localPort());
-  }
+
+  dbg(2, "Multicast discovery packet. Size: ");
+  dbg(2, packetSize);
+  dbg(2, "; Remote IP: ");
+  dbg(2, xg2UdpDiscovery.remoteIP().toString().c_str());
+  dbg(2, "; Remote Port: ");
+  dbg(2, xg2UdpDiscovery.remotePort());
+  dbg(2, "; Destination IP: ");
+  dbg(2, xg2UdpDiscovery.destinationIP());
+  dbg(2, "; Local Port: ");
+  dbgLn(2, xg2UdpUnicast.localPort());
 
   int len = xg2UdpDiscovery.read(xg2Buffer, UDP_TX_PACKET_MAX_SIZE);
   if (len > 0) {
     xg2Buffer[len] = 0;
   }
-  if (configDebugLvl > 0) {
-    Serial.print("Multicast discovery resp: ");
-    Serial.println(xg2Buffer);
-  }
+  dbg(1, "Multicast discovery resp: ");
+  dbgLn(1, xg2Buffer);
 
   deserializeJson(xg2DocDiscoveryResp, xg2Buffer);
 
@@ -212,19 +189,15 @@ int xg2Write(String model, String sid, String data) {
    Unicast request. Returns more than one on success.
 */
 int xg2UnicastRequest(String request) {
-  if (configDebugLvl > 0) {
-    Serial.print("Unicast send: ");
-    Serial.println(request);
-  }
+  dbg(1, "Unicast send: ");
+  dbgLn(1, request);
 
   xg2UdpUnicast.beginPacket(configGatewayIp, XG2_GATEWAY_MULTICAST_PORT);
   xg2UdpUnicast.write((char*) request.c_str());
   int isEnd = xg2UdpUnicast.endPacket();
 
-  if (configDebugLvl > 1) {
-    Serial.print("End unicast packet: ");
-    Serial.println(isEnd);
-  }
+  dbg(2, "End unicast packet: ");
+  dbgLn(2, isEnd);
   return isEnd;
 }
 
@@ -232,18 +205,15 @@ int xg2UnicastRequest(String request) {
    Multicast request. Returns more than one on success.
 */
 int xg2MulticastRequest(String request) {
-  if (configDebugLvl > 0) {
-    Serial.print("Multicast send: ");
-    Serial.println(request);
-  }
+  dbg(1, "Multicast send: ");
+  dbgLn(1, request);
+
   xg2UdpMulticast.beginPacketMulticast(xg2MulticastIp, XG2_GATEWAY_MULTICAST_PORT, WiFi.localIP());
   xg2UdpMulticast.write((char*) request.c_str());
   int isEnd = xg2UdpMulticast.endPacket();
 
-  if (configDebugLvl > 1) {
-    Serial.print("End multicast packet: ");
-    Serial.println(isEnd);
-  }
+  dbg(2, "End multicast packet: ");
+  dbgLn(2, isEnd);
   return isEnd;
 }
 
@@ -251,18 +221,15 @@ int xg2MulticastRequest(String request) {
    Discovery request. Returns more than one on success.
 */
 int xg2DiscoveryRequest(String request) {
-  if (configDebugLvl > 0) {
-    Serial.print("Discovery send: ");
-    Serial.println(request);
-  }
+  dbg(1, "Discovery send: ");
+  dbgLn(1, request);
+
   xg2UdpDiscovery.beginPacketMulticast(xg2MulticastIp, XG2_GATEWAY_DISCOVERY_PORT, WiFi.localIP());
   xg2UdpDiscovery.write((char*) request.c_str());
   int isEnd = xg2UdpDiscovery.endPacket();
 
-  if (configDebugLvl > 1) {
-    Serial.print("End discovery packet: ");
-    Serial.println(isEnd);
-  }
+  dbg(2, "End discovery packet: ");
+  dbgLn(2, isEnd);
   return isEnd;
 }
 

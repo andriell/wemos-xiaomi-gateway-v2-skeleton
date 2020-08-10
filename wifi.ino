@@ -1,23 +1,16 @@
 // Дожидается подключения к wi-fi
 // Выводит лог на экран
 void wifiConnection() {
-  if (configDebugLvl > 0) {
-    Serial.println(String("Connecting to "));
-    Serial.println(String(configWifiSsid));
-  }
+  dbg(1, "Connecting to ");
+  dbgLn(1, configWifiSsid);
 
   while (WiFi.status() != WL_CONNECTED) {
     ledBlink(1, 250);
-    if (configDebugLvl > 0) {
-      Serial.println(String("Connecting to Wi-Fi"));
-    }
+    dbgLn(1, "Connecting to Wi-Fi");
   }
-  if (configDebugLvl > 0) {
-    Serial.println(String("Wi-Fi connected"));
-    Serial.println(String("IP address: "));
-
-    Serial.println(wifiGetIpString());
-  }
+  dbgLn(1, "Wi-Fi connected");
+  dbg(1, "IP address: ");
+  dbgLn(1, wifiGetIpString());
   ledBlink(3, 500);
 }
 

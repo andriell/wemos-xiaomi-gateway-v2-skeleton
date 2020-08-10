@@ -31,9 +31,12 @@ void setup() {
   wifiSetup();
   timeSetup();
   xg2Setup();
+  dbgSetup();
 }
 
 void loop() {
+  srLoop();
+  dbgLoop();
   wifiLoop();
 
   exampleLoopSendCommand();
